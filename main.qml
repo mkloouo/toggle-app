@@ -10,7 +10,32 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
     title: 'Toggle Button Window'
-    //    flags: Qt.Window | Qt.FramelessWindowHint
+
+    Rectangle {
+        id: customBar
+        visible: false
+        x: 0
+        y: 0
+        width: parent.width
+        height: 30
+        color: 'black'
+        Text {
+            x: 0
+            y: 0
+            text: 'X'
+            color: 'white'
+            width: 10
+            height: parent.width
+            font.pointSize: 20
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    toggleWindow.close()
+                }
+            }
+        }
+    }
 
     Component.onCompleted: {
         setX(Screen.width / 2 - width / 2)
@@ -23,8 +48,13 @@ ApplicationWindow {
         height: parent.height / 2
 
         onStateChanged: {
-            console.log('state: ' + state)
-            console.log('bool on: ' + on)
+            if (state == 'on') {
+                toggleWindow.flags = Qt.Window
+                customBar.visible = false
+            } else {
+                toggleWindow.flags = Qt.Window | Qt.FramelessWindowHint
+                customBar.visible = true
+            }
         }
     }
 }

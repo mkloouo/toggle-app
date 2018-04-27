@@ -4,14 +4,24 @@ import QtQuick 2.9
 
 Item {
     id: toggleSwitch
-    state: 'off'
-    property bool on: (state == 'on')
+    state: 'on'
+    property int minX: (background.width / 2) * 0.05
+    property int maxX: (background.width / 2) - ((background.width / 2) * 0.05)
 
     function releaseToggle() {
         var midPoint = (background.width / 4)
-        toggleSwitch.state = (button.x <= midPoint) ? 'off' : 'on'
+        if (button.x <= midPoint) {
+            if (button.x != minX) {
+                toggleSwitch.state = 'mid-air'
+            }
+            toggleSwitch.state = 'off'
+        } else {
+            if (button.x != maxX) {
+                toggleSwitch.state = 'mid-air'
+            }
+            toggleSwitch.state = 'on'
+        }
     }
-
     Rectangle {
         id: background
         color: '#00ff69'
@@ -21,15 +31,13 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: {
-                toggleSwitch.state = (toggleSwitch.state == 'on') ? 'off' : 'on'
-            }
+            onClicked: { toggleSwitch.state = (toggleSwitch.state == 'on') ? 'off' : 'on' }
         }
 
         Rectangle {
             id: button
             color: 'white'
-            x: (parent.width / 2) * 0.05
+            x: minX
             y: parent.height * 0.05
             height: parent.height * 0.9
             width: parent.width / 2
@@ -39,9 +47,10 @@ Item {
                 anchors.fill: button
                 drag.target: button
                 drag.axis: Drag.XAxis
-                drag.minimumX: (background.width / 2) * 0.05
-                drag.maximumX: (background.width / 2) - ((background.width / 2) * 0.05)
+                drag.minimumX: minX
+                drag.maximumX: maxX
                 onReleased: releaseToggle()
+                onClicked: { toggleSwitch.state = (toggleSwitch.state == 'on') ? 'off' : 'on' }
             }
         }
     }
@@ -51,7 +60,7 @@ Item {
             name: 'on'
             PropertyChanges {
                 target: button
-                x: (background.width / 2) - ((background.width / 2) * 0.05)
+                x: maxX
             }
             PropertyChanges { target: background; color: '#00ff69' }
         },
@@ -59,10 +68,14 @@ Item {
             name: 'off'
             PropertyChanges {
                 target: button
-                x: (background.width / 2) * 0.05
+                x: minX
             }
             PropertyChanges { target: background; color: 'black' }
+        },
+        State {
+            name: 'mid-air'
         }
+
     ]
 
     transitions: Transition {
@@ -71,9 +84,6 @@ Item {
             easing.type: Easing.InOutQuad
             duration: 200
         }
-
-        ColorAnimation {
-            duration: 200
-        }
+        ColorAnimation { duration: 200 }
     }
 }
